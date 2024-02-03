@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="loginContext" prefHeight="400.0" prefWidth="694.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kaveesha.edu.controller.LoginFormController">
+   <children>
+      <ImageView fitHeight="400.0" fitWidth="323.0" layoutX="-3.0" pickOnBounds="true">
+         <image>
+            <Image url="@../assets/secuirty/login.jpg" />
+         </image>
+      </ImageView>
+      <TextField fx:id="txtEmail" layoutX="343.0" layoutY="111.0" prefHeight="25.0" prefWidth="323.0" promptText="Root Email" text="g@gmail.com" />
+      <Label layoutX="343.0" layoutY="65.0" text="Login">
+         <font>
+            <Font name="System Bold" size="17.0" />
+         </font>
+      </Label>
+      <PasswordField fx:id="txtPassword" layoutX="343.0" layoutY="152.0" prefHeight="25.0" prefWidth="323.0" promptText="Password" text="123" />
+      <Button layoutX="343.0" layoutY="200.0" mnemonicParsing="false" onAction="#signInOnAction" prefHeight="31.0" prefWidth="323.0" style="-fx-background-color: #1A84D0;" text="Sign In" textFill="#fcf5f5">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </Button>
+      <Label layoutX="496.0" layoutY="250.0" text="OR" textFill="#979393">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Button layoutX="343.0" layoutY="281.0" mnemonicParsing="false" onAction="#createAnAccountOnAction" prefHeight="31.0" prefWidth="323.0" style="-fx-background-color: #1D2238;" text="Create An Account" textFill="#fcf5f5">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>

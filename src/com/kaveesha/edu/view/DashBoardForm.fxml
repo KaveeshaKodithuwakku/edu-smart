@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="dashboardFormContext" prefHeight="484.0" prefWidth="1023.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kaveesha.edu.controller.DashBoardFormController">
+   <children>
+      <Label layoutX="22.0" layoutY="25.0" text="Dashboard">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="643.0" layoutY="30.0" text="10:20:13">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label layoutX="722.0" layoutY="30.0" text="2023-01-23">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Separator layoutX="707.0" layoutY="25.0" orientation="VERTICAL" prefHeight="27.0" prefWidth="4.0" />
+      <Button layoutX="852.0" layoutY="26.0" mnemonicParsing="false" onAction="#makeBackupOnAction" prefHeight="25.0" prefWidth="127.0" text="Make a backup" />
+      <AnchorPane layoutX="35.0" layoutY="75.0" onMouseClicked="#studentClickOnAction" prefHeight="163.0" prefWidth="175.0" style="-fx-background-color: #1ABC9C;">
+         <children>
+            <ImageView fitHeight="102.0" fitWidth="137.0" layoutX="19.0" layoutY="22.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/dashboard/undraw_Exams_re_4ios.png" />
+               </image></ImageView>
+            <Label layoutX="62.0" layoutY="129.0" text="Student" textFill="#fcfafa">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutX="225.0" layoutY="75.0" onMouseClicked="#programClickOnAction" prefHeight="163.0" prefWidth="175.0" style="-fx-background-color: #D15122;">
+         <children>
+            <Label layoutX="59.0" layoutY="129.0" text="Program" textFill="#fcfafa">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <ImageView fitHeight="102.0" fitWidth="137.0" layoutX="21.0" layoutY="20.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/dashboard/undraw_Pair_programming.png" />
+               </image>
+            </ImageView>
+            
+         </children></AnchorPane>
+      <AnchorPane layoutX="416.0" layoutY="75.0" onMouseClicked="#trainersClickOnAction" prefHeight="163.0" prefWidth="175.0" style="-fx-background-color: #2C3E50;">
+         <children>
+            <ImageView fitHeight="102.0" fitWidth="137.0" layoutX="19.0" layoutY="24.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/dashboard/undraw_Educator_re_ju47.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="58.0" layoutY="128.0" text="Trainers" textFill="#fcfafa">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+         </children></AnchorPane>
+      <AnchorPane layoutX="604.0" layoutY="75.0" onMouseClicked="#intakeClickOnAction" prefHeight="163.0" prefWidth="175.0" style="-fx-background-color: #8E44AD;">
+         <children>
+            <ImageView fitHeight="102.0" fitWidth="137.0" layoutX="19.0" layoutY="25.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/dashboard/undraw_education_f8ru.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="67.0" layoutY="129.0" text="Intake" textFill="#fcfafa">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+         </children></AnchorPane>
+      <AnchorPane layoutX="795.0" layoutY="75.0" onMouseClicked="#incomeClickOnAction" prefHeight="163.0" prefWidth="175.0" style="-fx-background-color: #D3281F;">
+         <children>
+            <ImageView fitHeight="102.0" fitWidth="137.0" layoutX="19.0" layoutY="26.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/dashboard/undraw_Finance_re_gnv2.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="63.0" layoutY="129.0" text="Income" textFill="#fcfafa">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+         </children></AnchorPane>
+      <AnchorPane layoutX="345.0" layoutY="264.0" onMouseClicked="#registrationClickOnAction" prefHeight="163.0" prefWidth="175.0" style="-fx-background-color: #487EB0;">
+         <children>
+            <ImageView fitHeight="102.0" fitWidth="137.0" layoutX="19.0" layoutY="27.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/dashboard/undraw_Checklist__re_2w7v.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="47.0" layoutY="129.0" text="Registration" textFill="#fcfafa">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+         </children></AnchorPane>
+      <AnchorPane layoutX="538.0" layoutY="264.0" onMouseClicked="#reportsClickOnAction" prefHeight="163.0" prefWidth="175.0" style="-fx-background-color: #DF9622;">
+         <children>
+            <ImageView fitHeight="102.0" fitWidth="137.0" layoutX="19.0" layoutY="22.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/dashboard/undraw_Report_re_f5n5.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="55.0" layoutY="129.0" text="Reports" textFill="#fcfafa">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+         </children></AnchorPane>
+      <Label layoutX="863.0" layoutY="453.0" text="Developed by : Kaveesha">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label layoutX="22.0" layoutY="453.0" text="Version : 1.0.0">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+   </children>
+   <cursor>
+      <Cursor fx:constant="HAND" />
+   </cursor>
+</AnchorPane>
