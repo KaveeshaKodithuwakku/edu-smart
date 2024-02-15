@@ -1,6 +1,12 @@
 package com.kaveesha.edu.controller;
 
+import com.kaveesha.edu.bo.BoFactory;
+import com.kaveesha.edu.bo.custom.IntakeBo;
+import com.kaveesha.edu.bo.custom.ProgramBo;
 import com.kaveesha.edu.database.DbConnection;
+import com.kaveesha.edu.dto.IntakeDto;
+import com.kaveesha.edu.dto.ProgramDto;
+import com.kaveesha.edu.dto.StudentDto;
 import com.kaveesha.edu.model.Intake;
 import com.kaveesha.edu.util.GlobalVar;
 import com.kaveesha.edu.view.tm.IntakeTM;
@@ -36,6 +42,8 @@ public class IntakeFormController {
     String selectedProgramId = "";
     String searchText = "";
     long selectedIntakeId = 0;
+    private IntakeBo intakeBo = BoFactory.getBo(BoFactory.BoType.INTAKE);
+    private ProgramBo programBo = BoFactory.getBo(BoFactory.BoType.PROGRAM);
     
     public void initialize(){
 
@@ -45,7 +53,7 @@ public class IntakeFormController {
         colStartDate.setCellValueFactory(new PropertyValueFactory<>("startDate"));
         colOption.setCellValueFactory(new PropertyValueFactory<>("buttonBar"));
 
-        loadPrograms();
+    //    loadPrograms();
         loadTableData(searchText);
 
         cmbProgram.getSelectionModel().selectedItemProperty()
@@ -56,21 +64,12 @@ public class IntakeFormController {
 
     private void loadPrograms() {
         try {
-
-            Connection connection = DbConnection.getInstance().getConnection();
-            String query = "SELECT program_id,program_name FROM program";
-
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
             ObservableList<String> list = FXCollections.observableArrayList();
 
-            while (resultSet.next()) {
-                list.add(resultSet.getString(1) + " : " + resultSet.getString(2));
+            for (ProgramDto programDto: programBo.loadPrograms()) {
+                list.add(programDto.getProgramId() + " : " + programDto.getProgramName());
             }
-
             cmbProgram.setItems(list);
-
         } catch (ClassNotFoundException | SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Something went wrong").show();
             e.printStackTrace();
@@ -81,40 +80,29 @@ public class IntakeFormController {
         setUi("DashBoardForm");
     }
 
-
-
     public void saveUpdateOnAction(ActionEvent actionEvent) {
 
-        Intake intake = new Intake(
+        IntakeDto intake = new IntakeDto(
                 0,
                 txtIntakeName.getText(),
                 txtDate.getValue(),
-                Long.parseLong(selectedProgramId)
+                Long.parseLong(selectedProgramId),
+                ""
                 );
 
         if(btnSaveUpdate.getText().equalsIgnoreCase("Save Intake")){
                try {
-                   Connection connection = DbConnection.getInstance().getConnection();
-                    String query = "INSERT INTO intake(intake_name,start_date,program_program_id) VALUES(?,?,?)";
-
-                    PreparedStatement preparedStatement = connection.prepareStatement(query);
-
-                    preparedStatement.setString(1,intake.getIntakeName());
-                    preparedStatement.setDate(2,java.sql.Date.valueOf(intake.getStartDate()));
-                    preparedStatement.setLong(3,intake.getProgramId());
-
-                    boolean isSaved = preparedStatement.executeUpdate()>0;
-                    if(isSaved){
+                   if(intakeBo.saveIntake(intake)){
                         new Alert(Alert.AlertType.INFORMATION,"Intake Saved!").show();
                         clearFields();
                         loadTableData(searchText);
-                    }
-
+                   }else{
+                       new Alert(Alert.AlertType.WARNING, "Try Again").show();
+                   }
                 } catch (ClassNotFoundException | SQLException e) {
                     new Alert(Alert.AlertType.ERROR, "Something went wrong").show();
                     e.printStackTrace();
                 }
-
         }else{
 
             if (selectedIntakeId==0){
@@ -123,16 +111,7 @@ public class IntakeFormController {
             }
 
             try {
-                Connection connection = DbConnection.getInstance().getConnection();
-                String query = "UPDATE intake SET intake_name =?, start_date =?, program_program_id =? WHERE intake_id =?";
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setString(1,intake.getIntakeName());
-                preparedStatement.setDate(2,java.sql.Date.valueOf(intake.getStartDate()));
-                preparedStatement.setLong(3,intake.getProgramId());
-                preparedStatement.setLong(4,selectedIntakeId);
-
-
-                if(preparedStatement.executeUpdate() > 0){
+                if(intakeBo.updateIntake(intake,selectedIntakeId)){
                     new Alert(Alert.AlertType.INFORMATION,"Intake updated").show();
                     clearFields();
                     loadTableData(searchText);
@@ -155,19 +134,11 @@ public class IntakeFormController {
         searchText = "%"+searchText+"%";
 
         try {
-            Connection connection = DbConnection.getInstance().getConnection();
-
-            String query = "SELECT i.intake_id,i.intake_name, i.start_date, p.program_name FROM intake i INNER JOIN" +
-                    " program p ON i.program_program_id=p.program_id WHERE intake_name LIKE ? ";
-
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1,searchText);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
 
             ObservableList<IntakeTM> obIntakeList = FXCollections.observableArrayList();
 
-            while (resultSet.next()){
+            for (IntakeDto intakeDto:intakeBo.findAllIntakes(searchText)
+            ) {
 
                 Button deleteBtn = new Button("Delete");
                 Button updateBtn = new Button("Update");
@@ -175,10 +146,10 @@ public class IntakeFormController {
                 buttonBar.getButtons().addAll(deleteBtn,updateBtn);
 
                 IntakeTM intakeTM = new IntakeTM(
-                        resultSet.getLong(1),
-                        resultSet.getString(2),
-                        resultSet.getString(4),
-                        LocalDate.parse(resultSet.getString(3)),
+                        intakeDto.getIntakeId(),
+                        intakeDto.getIntakeName(),
+                        intakeDto.getProgramName(),
+                        intakeDto.getStartDate(),
                         buttonBar
                 );
 
@@ -199,12 +170,7 @@ public class IntakeFormController {
 
                     if(buttonType.get() == ButtonType.YES){
                         try {
-                            Connection connection1 = DbConnection.getInstance().getConnection();
-                            String query1 = "DELETE FROM intake WHERE intake_id = ?";
-                            PreparedStatement preparedStatement1 = connection1.prepareStatement(query1);
-                            preparedStatement1.setLong(1,intakeTM.getIntakeId());
-
-                            if(preparedStatement1.executeUpdate() > 0){
+                            if(intakeBo.deleteIntake(intakeTM.getIntakeId()) ){
                                 new Alert(Alert.AlertType.INFORMATION,"Intake deleted").show();
                                 loadTableData("");
                                 clearFields();

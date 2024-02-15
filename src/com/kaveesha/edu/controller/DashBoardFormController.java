@@ -1,55 +1,97 @@
 package com.kaveesha.edu.controller;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class DashBoardFormController {
     public AnchorPane dashboardFormContext;
+    public Label lblTime;
+    public Label lblDate;
+
+    public void initialize(){
+        setData();
+    }
+
+    private void setData() {
+
+        Timeline timeline = new Timeline(
+                new KeyFrame(
+                        Duration.seconds(1), event -> {
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+                    String currentTime = simpleDateFormat.format(new Date());
+                    lblTime.setText(currentTime);
+                }
+                )
+        );
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+
+
+        //-------------------------
+        Date date = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        lblDate.setText(simpleDateFormat.format(date));
+
+    }
 
     public void studentClickOnAction(MouseEvent mouseEvent) throws IOException {
-        setUi("StudentForm");
+        setUi("StudentForm","student");
     }
 
     public void programClickOnAction(MouseEvent mouseEvent) throws IOException {
-        setUi("ProgramsForm");
+        setUi("ProgramsForm","program");
     }
 
     public void trainersClickOnAction(MouseEvent mouseEvent) throws IOException {
-        setUi("TrainerForm");
+        setUi("TrainerForm","trainer");
     }
 
     public void intakeClickOnAction(MouseEvent mouseEvent) throws IOException {
-        setUi("IntakeForm");
+        setUi("IntakeForm","intake");
     }
 
     public void incomeClickOnAction(MouseEvent mouseEvent) throws IOException {
-        setUi("IncomeForm");
+        setUi("IncomeForm","income");
     }
 
     public void registrationClickOnAction(MouseEvent mouseEvent) throws IOException {
-        setUi("RegistrationForm");
+        setUi("RegistrationForm","registration");
     }
 
     public void reportsClickOnAction(MouseEvent mouseEvent) throws IOException {
-        setUi("ReportsForm");
+        setUi("ReportsForm","reports");
     }
 
-    private void setUi(String location) throws IOException {
+    private void setUi(String location, String styleSheet) throws IOException {
+
+        Scene scene = new Scene(FXMLLoader.load(getClass().getResource("../view/" + location + ".fxml")));
+        scene.getStylesheets().add(getClass().getResource("../view/styles/"+styleSheet+".css").toExternalForm());
         Stage stage = (Stage) dashboardFormContext.getScene().getWindow();
-        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("../View/" + location + ".fxml"))));
+        stage.setScene(scene);
         stage.centerOnScreen();
+
+//        Stage stage = (Stage) dashboardFormContext.getScene().getWindow();
+//        stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("../View/" + location + ".fxml"))));
+//        stage.centerOnScreen();
     }
 
     public void makeBackupOnAction(ActionEvent actionEvent) {

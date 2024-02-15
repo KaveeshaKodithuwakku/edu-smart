@@ -1,9 +1,12 @@
 package com.kaveesha.edu.controller;
 
-import com.kaveesha.edu.database.DbConnection;
-import com.kaveesha.edu.model.User;
+import com.kaveesha.edu.bo.BoFactory;
+import com.kaveesha.edu.bo.custom.UserBo;
+import com.kaveesha.edu.dao.DaoFactory;
+import com.kaveesha.edu.dao.custom.UserDao;
+import com.kaveesha.edu.dto.UserDto;
+import com.kaveesha.edu.entity.User;
 import com.kaveesha.edu.util.GlobalVar;
-import com.kaveesha.edu.util.security.PasswordManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -15,9 +18,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class SignupFormController {
@@ -27,6 +27,7 @@ public class SignupFormController {
     public TextField txtFirstName;
     public TextField txtLastName;
     public Button btnSignUp;
+    private UserBo userBo = BoFactory.getBo(BoFactory.BoType.USER);
 
     public void initialize(){
         txtFirstName.requestFocus();
@@ -34,25 +35,17 @@ public class SignupFormController {
 
     public void signupOnAction(ActionEvent actionEvent) throws IOException {
 
-        User user = new User(
+        UserDto user = new UserDto(
                 txtFirstName.getText(),
                 txtLastName.getText(),
                 txtEmail.getText(),
-                txtPassword.getText()
+                txtPassword.getText(),
+                true
         );
 
         try {
-            Connection connection = DbConnection.getInstance().getConnection();
 
-            String query = "INSERT INTO user VALUES (?,?,?,?,?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1,user.getEmail());
-           preparedStatement.setString(2,user.getFirst_name());
-           preparedStatement.setString(3,user.getLast_name());
-           preparedStatement.setString(4, PasswordManager.encrypt(user.getPassword()));
-           preparedStatement.setBoolean(5,true);
-
-            if(preparedStatement.executeUpdate() > 0){
+            if(userBo.saveUser(user)){
                 new Alert(Alert.AlertType.INFORMATION,"User saved success").show();
                 GlobalVar.userEmail = user.getEmail().trim();
                 setUi("DashBoardForm");

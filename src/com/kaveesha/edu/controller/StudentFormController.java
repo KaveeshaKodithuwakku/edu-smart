@@ -1,11 +1,10 @@
 package com.kaveesha.edu.controller;
 
-import com.kaveesha.edu.database.DbConnection;
-import com.kaveesha.edu.model.Student;
-import com.kaveesha.edu.model.Trainer;
-import com.kaveesha.edu.util.GlobalVar;
+import com.kaveesha.edu.bo.BoFactory;
+import com.kaveesha.edu.bo.custom.StudentBo;
+import com.kaveesha.edu.dto.StudentDto;
+import com.kaveesha.edu.validates.SimpleTextValidation;
 import com.kaveesha.edu.view.tm.StudentTM;
-import com.kaveesha.edu.view.tm.TrainerTM;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -42,6 +41,7 @@ public class StudentFormController {
     public RadioButton rBtnActive;
     private String searchText ="";
     private int selectedId = 0;
+    private StudentBo studentBo = BoFactory.getBo(BoFactory.BoType.STUDENT);
 
     public void initialize(){
 
@@ -71,35 +71,28 @@ public class StudentFormController {
     }
 
     public void saveUpdateOnAction(ActionEvent actionEvent) {
-        Student student= new Student(0,txtName.getText(),
+
+        txtName.getStyleClass().remove("error");
+
+        if(SimpleTextValidation.validateName(txtName.getText())){
+            txtName.getStyleClass().add("error");
+            new Alert(Alert.AlertType.WARNING, "Wrong Student name").show();
+            return;
+        }
+
+        StudentDto student= new StudentDto(0,txtName.getText(),
                 txtEmail.getText(),
                 txtDob.getValue(),txtAddress.getText(),true);
 
         if(btnSaveUpdate.getText().equalsIgnoreCase("Save Student")){
             try{
-
-                Connection connection = DbConnection.getInstance().getConnection();
-
-                String query = "INSERT INTO student(student_name,email,dob,address,status,user_email)" +
-                        " VALUES (?,?,?,?,?,?)";
-
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setString(1,student.getStudentName());
-                preparedStatement.setString(2,student.getEmail());
-                preparedStatement.setDate(3,java.sql.Date.valueOf(student.getDate()));
-                preparedStatement.setString(4,student.getAddress());
-                preparedStatement.setBoolean(5, student.isStatus());
-                preparedStatement.setString(6, GlobalVar.userEmail);
-
-
-                if(preparedStatement.executeUpdate()>0){
+                if(studentBo.saveStudent(student)){
                     new Alert(Alert.AlertType.INFORMATION, "Student was Saved!").show();
                     clearFields();
                     loadStudents(searchText);
                 }else{
                     new Alert(Alert.AlertType.WARNING, "Try Again").show();
                 }
-
             }catch (ClassNotFoundException | SQLException e){
                 new Alert(Alert.AlertType.ERROR, "Something went wrong").show();
                 e.printStackTrace();
@@ -112,18 +105,7 @@ public class StudentFormController {
             }
 
             try {
-                Connection connection = DbConnection.getInstance().getConnection();
-                String query = "UPDATE student SET student_name =?, email =?, dob =?, address =?, status=? WHERE student_id =?";
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setString(1,student.getStudentName());
-                preparedStatement.setString(2,student.getEmail());
-                preparedStatement.setDate(3,java.sql.Date.valueOf(student.getDate()));
-                preparedStatement.setString(4,student.getAddress());
-                preparedStatement.setBoolean(5,rBtnActive.isSelected());
-                preparedStatement.setInt(6,selectedId);
-
-
-                if(preparedStatement.executeUpdate() > 0){
+                if(studentBo.updateStudent(student,rBtnActive.isSelected(),selectedId)){
                     new Alert(Alert.AlertType.INFORMATION,"Student updated").show();
                     clearFields();
                     loadStudents(searchText);
@@ -149,77 +131,70 @@ public class StudentFormController {
         searchText = "%"+searchText+"%";
 
         try {
-            Connection connection = DbConnection.getInstance().getConnection();
-
-            String query = "SELECT * FROM student WHERE student_name LIKE ? OR email LIKE ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1,searchText);
-            preparedStatement.setString(2,searchText);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
 
             ObservableList<StudentTM> obStudentList = FXCollections.observableArrayList();
 
-            while (resultSet.next()){
+            for (StudentDto student:studentBo.findAllStudent(searchText)
+                 ) {
 
                 Button deleteBtn = new Button("Delete");
                 Button updateBtn = new Button("Update");
                 ButtonBar buttonBar = new ButtonBar();
                 buttonBar.getButtons().addAll(deleteBtn,updateBtn);
 
-               StudentTM studentTM = new StudentTM(
-                       resultSet.getInt(1),
-                       resultSet.getString(2),
-                       resultSet.getString(3),
-                       resultSet.getString(4),
-                       resultSet.getString(5),
-                       resultSet.getBoolean(6)?"Active":"InActive",
-                       buttonBar
-               );
+                deleteBtn.getStyleClass().add("delete-button");
+                updateBtn.getStyleClass().add("update-button");
+
+                StudentTM studentTM = new StudentTM(
+                        student.getStudentId(),
+                        student.getStudentName(),
+                        student.getEmail(),
+                        student.getDate().toString(),
+                        student.getAddress(),
+                        student.isStatus()?"Active":"InActive",
+                        buttonBar
+                );
 
                 obStudentList.add(studentTM);
 
-               updateBtn.setOnAction(e -> {
+                updateBtn.setOnAction(e -> {
 
-                   txtName.setText(studentTM.getName());
-                   txtAddress.setText(studentTM.getAddress());
-                   txtEmail.setText(studentTM.getEmail());
-                   txtDob.setValue(LocalDate.parse(studentTM.getDob()));
-                   btnSaveUpdate.setText("Update Student");
-                   selectedId = studentTM.getId();
-                   if(studentTM.getStatus().equals("Active")){
-                       rBtnActive.setSelected(true);
-                   }else {
-                       rBtnInactive.setSelected(true);
-                   }
-                   manageTrainerStatus(true);
-               });
+                    txtName.setText(studentTM.getName());
+                    txtAddress.setText(studentTM.getAddress());
+                    txtEmail.setText(studentTM.getEmail());
+                    txtDob.setValue(LocalDate.parse(studentTM.getDob()));
+                    btnSaveUpdate.setText("Update Student");
+                    selectedId = studentTM.getId();
+                    if(studentTM.getStatus().equals("Active")){
+                        rBtnActive.setSelected(true);
+                    }else {
+                        rBtnInactive.setSelected(true);
+                    }
+                    manageTrainerStatus(true);
+                });
 
-               deleteBtn.setOnAction(e -> {
+                deleteBtn.setOnAction(e -> {
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"Are you sure?",ButtonType.YES,ButtonType.NO);
-                   Optional<ButtonType> buttonType = alert.showAndWait();
+                    Optional<ButtonType> buttonType = alert.showAndWait();
 
-                   if(buttonType.get() == ButtonType.YES){
-                       try {
-                           Connection connection1 = DbConnection.getInstance().getConnection();
-                           String query1 = "DELETE FROM student WHERE student_id = ?";
-                           PreparedStatement preparedStatement1 = connection1.prepareStatement(query1);
-                           preparedStatement1.setInt(1,studentTM.getId());
-
-                           if(preparedStatement1.executeUpdate() > 0){
+                    if(buttonType.get() == ButtonType.YES){
+                        try {
+                            if(studentBo.deleteStudent(studentTM.getId()) ){
                                 new Alert(Alert.AlertType.INFORMATION,"Student deleted").show();
                                 loadStudents("");
                                 manageTrainerStatus(false);
                                 clearFields();
-                           }else {
-                               new Alert(Alert.AlertType.INFORMATION,"Try again!").show();
-                           }
-                       } catch (ClassNotFoundException | SQLException ex) {
-                         ex.printStackTrace();
-                       }
-                   }
-               });
+                            }else {
+                                new Alert(Alert.AlertType.INFORMATION,"Try again!").show();
+                            }
+                        } catch (ClassNotFoundException | SQLException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+
             }
+
             tblStudent.setItems(obStudentList);
         } catch (ClassNotFoundException | SQLException e) {
            e.printStackTrace();

@@ -1,9 +1,8 @@
 package com.kaveesha.edu.controller;
 
-import com.kaveesha.edu.database.DbConnection;
-import com.kaveesha.edu.model.Trainer;
-import com.kaveesha.edu.util.GlobalVar;
-import com.kaveesha.edu.view.tm.StudentTM;
+import com.kaveesha.edu.bo.BoFactory;
+import com.kaveesha.edu.bo.custom.TrainerBo;
+import com.kaveesha.edu.dto.TrainerDto;
 import com.kaveesha.edu.view.tm.TrainerTM;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -17,7 +16,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.Optional;
 
 public class TrainerFormController {
@@ -43,6 +41,8 @@ public class TrainerFormController {
 
     String searchText = "";
     int selectedTrainerId = 0;
+
+    private TrainerBo trainerBo = BoFactory.getBo(BoFactory.BoType.TRAINER);
 
     public void initialize(){
 
@@ -77,7 +77,7 @@ public class TrainerFormController {
 
     public void btnSaveUpdateOnAction(ActionEvent actionEvent) {
 
-        Trainer trainer = new Trainer(
+        TrainerDto trainer = new TrainerDto(
                 0,
                 txtTrainerName.getText(),
                 txtEmail.getText(),
@@ -88,19 +88,7 @@ public class TrainerFormController {
 
         if(btnSaveUpdate.getText().equalsIgnoreCase("Save Trainer")){
             try {
-                Connection connection = DbConnection.getInstance().getConnection();
-
-                String query = "INSERT INTO trainer(trainer_name,trainer_email,nic,address,trainer_status)" +
-                        " VALUES (?,?,?,?,?)";
-
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setString(1,trainer.getTrainerName());
-                preparedStatement.setString(2,trainer.getTrainerEmail());
-                preparedStatement.setString(3,trainer.getNic());
-                preparedStatement.setString(4,trainer.getAddress());
-                preparedStatement.setBoolean(5, trainer.isStatus());
-
-                if(preparedStatement.executeUpdate()>0){
+                if(trainerBo.saveTrainer(trainer)){
                     new Alert(Alert.AlertType.INFORMATION, "Trainer was Saved!").show();
                     clearFields();
                     loadTrainers(searchText);
@@ -118,17 +106,7 @@ public class TrainerFormController {
             }
 
             try {
-                Connection connection = DbConnection.getInstance().getConnection();
-                String query = "UPDATE trainer SET trainer_name =?, trainer_email=?, nic=?, address=?, trainer_status=? WHERE trainer_id=?";
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setString(1,trainer.getTrainerName());
-                preparedStatement.setString(2,trainer.getTrainerEmail());
-                preparedStatement.setString(3,trainer.getNic());
-                preparedStatement.setString(4,trainer.getAddress());
-                preparedStatement.setBoolean(5,rBtnActive.isSelected());
-                preparedStatement.setInt(6,selectedTrainerId);
-
-              if(preparedStatement.executeUpdate() > 0){
+              if(trainerBo.updateTrainer(trainer, rBtnActive.isSelected(), selectedTrainerId )){
                   new Alert(Alert.AlertType.INFORMATION,"Trainer updated successfully").show();
                   clearFields();
                   loadTrainers(searchText);
@@ -149,29 +127,21 @@ public class TrainerFormController {
         searchText = "%"+searchText+"%";
 
         try {
-            Connection connection = DbConnection.getInstance().getConnection();
 
-            String query = "SELECT * FROM trainer WHERE trainer_name LIKE ? OR trainer_email LIKE ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1,searchText);
-            preparedStatement.setString(2,searchText);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()){
-
+            for (TrainerDto trainer: trainerBo.findAllTrainers(searchText)
+                 ) {
                 Button deleteBtn = new Button("Delete");
                 Button updateBtn = new Button("Update");
                 ButtonBar buttonBar = new ButtonBar();
                 buttonBar.getButtons().addAll(deleteBtn,updateBtn);
 
                 TrainerTM trainerTM = new TrainerTM(
-                        resultSet.getInt(1),
-                        resultSet.getString(2),
-                        resultSet.getString(3),
-                        resultSet.getString(4),
-                        resultSet.getString(5),
-                        resultSet.getBoolean(6)?"Active":"InActive",
+                        trainer.getTrainerId(),
+                        trainer.getTrainerName(),
+                        trainer.getTrainerEmail(),
+                        trainer.getNic(),
+                        trainer.getAddress(),
+                        trainer.isStatus()?"Active":"InActive",
                         buttonBar
                 );
 
@@ -199,13 +169,7 @@ public class TrainerFormController {
 
                     if(buttonType.get() == ButtonType.YES){
                         try {
-                            Connection connection1 = DbConnection.getInstance().getConnection();
-
-                            String query1 = "DELETE FROM trainer WHERE trainer_id = ?";
-                            PreparedStatement preparedStatement1 = connection1.prepareStatement(query1);
-                            preparedStatement1.setInt(1,trainerTM.getTrainerId());
-
-                            if(preparedStatement1.executeUpdate() > 0){
+                            if(trainerBo.deleteTrainer(trainerTM.getTrainerId())){
                                 new Alert(Alert.AlertType.INFORMATION,"Trainer deleted").show();
                                 loadTrainers("");
                                 manageTrainerStatus(false);
@@ -219,6 +183,7 @@ public class TrainerFormController {
                     }
                 });
             }
+
             tblTrainer.setItems(obTrainerList);
 
         } catch (ClassNotFoundException | SQLException e) {

@@ -16,12 +16,12 @@
             <Font name="System Bold" size="18.0" />
          </font>
       </Label>
-      <Label layoutX="643.0" layoutY="30.0" text="10:20:13">
+      <Label fx:id="lblTime" layoutX="643.0" layoutY="30.0" text="10:20:13" textFill="#cd1313">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label layoutX="722.0" layoutY="30.0" text="2023-01-23">
+      <Label fx:id="lblDate" layoutX="722.0" layoutY="30.0" text="2023-01-23" textFill="#cd1313">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>

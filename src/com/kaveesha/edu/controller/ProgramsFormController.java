@@ -15,11 +15,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -43,7 +45,7 @@ public class ProgramsFormController {
     private String searchText = "";
     private int selectedProgramId = 0;
     private ArrayList<String> trainerList = new ArrayList<>();
-    ObservableList<String> contents = FXCollections.observableArrayList();
+    ObservableList<HBox> contents = FXCollections.observableArrayList();
 
     public void initialize(){
 
@@ -83,14 +85,14 @@ public class ProgramsFormController {
                 Double.parseDouble(txtAmount.getText()),
                 GlobalVar.userEmail,
                 Long.parseLong(cmbTrainer.getValue().split(" : ")[0]),
-                contents
+                Collections.singletonList("")
+                //contents
         );
 
         if(btnSaveUpdate.getText().equalsIgnoreCase("Save Program")){
             try {
                 Connection connection = DbConnection.getInstance().getConnection();
-                String query = "INSERT INTO program(program_name,hours,amount,user_email,trainer_trainer_id)" +
-                        " VALUES (?,?,?,?,?)";
+                String query = "";
 
                 PreparedStatement preparedStatement = connection.prepareStatement(query);
                 preparedStatement.setString(1,program.getProgramName());
@@ -107,14 +109,14 @@ public class ProgramsFormController {
                 if(resultSet.next()){
                     long pId = resultSet.getLong(1);
                     if(isSaved){
-                        for(String cnt : contents){
-                            PreparedStatement preparedStatement2 =
-                                    connection.prepareStatement("INSERT INTO program_content(header,program_program_id) VALUES(?,?)");
-                            preparedStatement2.setObject(1, cnt);
-                            preparedStatement2.setObject(2, pId);
-
-                            preparedStatement2.executeUpdate();
-                        }
+//                        for(String cnt : contents){
+//                            PreparedStatement preparedStatement2 =
+//                                    connection.prepareStatement("INSERT INTO program_content(header,program_program_id) VALUES(?,?)");
+//                            preparedStatement2.setObject(1, cnt);
+//                            preparedStatement2.setObject(2, pId);
+//
+//                            preparedStatement2.executeUpdate();
+//                        }
                         new Alert(Alert.AlertType.INFORMATION, "Program Saved!").show();
                         clearFields();
                         loadPrograms(searchText);
@@ -247,7 +249,7 @@ public class ProgramsFormController {
                     if(buttonType.get() == ButtonType.YES){
                         try {
                             Connection connection1 = DbConnection.getInstance().getConnection();
-                            String query1 = "DELETE FROM program WHERE program_id = ?";
+                            String query1 = "";
                             PreparedStatement preparedStatement1 = connection1.prepareStatement(query1);
                             preparedStatement1.setInt(1,programTM.getProgramId());
 
@@ -324,6 +326,8 @@ public class ProgramsFormController {
         txtHours.clear();
         txtProgramName.clear();
         txtContent.clear();
+        lstProgramContent.setItems(null);
+        cmbTrainer.setValue(null);
     }
 
     private void setUi(String location) throws IOException {
@@ -333,7 +337,11 @@ public class ProgramsFormController {
     }
 
     public void txtContentOnAction(ActionEvent actionEvent) {
-        contents.add(txtContent.getText());
+        HBox hBox = new HBox();
+        Button btn = new Button("Delete");
+        hBox.getChildren().add(btn);
+        hBox.getChildren().add(new Label(txtContent.getText()));
+        contents.add(hBox);
         txtContent.clear();
         lstProgramContent.setItems(contents);
     }

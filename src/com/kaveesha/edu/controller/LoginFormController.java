@@ -1,6 +1,10 @@
 package com.kaveesha.edu.controller;
 
-import com.kaveesha.edu.database.DbConnection;
+import com.kaveesha.edu.bo.BoFactory;
+import com.kaveesha.edu.bo.custom.UserBo;
+import com.kaveesha.edu.dao.DaoFactory;
+import com.kaveesha.edu.dao.custom.UserDao;
+import com.kaveesha.edu.entity.User;
 import com.kaveesha.edu.util.GlobalVar;
 import com.kaveesha.edu.util.security.PasswordManager;
 import javafx.event.ActionEvent;
@@ -19,21 +23,17 @@ public class LoginFormController {
     public AnchorPane loginContext;
     public TextField txtEmail;
     public PasswordField txtPassword;
+    private UserBo userBo = BoFactory.getBo(BoFactory.BoType.USER);
+
 
     public void signInOnAction(ActionEvent actionEvent) throws IOException {
         try {
-            Connection connection = DbConnection.getInstance().getConnection();
 
-            String query = "SELECT email,password FROM user WHERE email =?";
-            System.out.println(query);
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1,txtEmail.getText());
+            User user = userBo.findUser(txtEmail.getText());
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if(resultSet.next()){
-                if(PasswordManager.checkPassword(txtPassword.getText(),resultSet.getString(2))){
-                    GlobalVar.userEmail = resultSet.getString(1);
+            if(!user.getEmail().equals(null) && !user.getPassword().equals(null)){
+                if(PasswordManager.checkPassword(txtPassword.getText(),user.getPassword())){
+                    GlobalVar.userEmail = user.getEmail();
                     setUi("DashBoardForm");
                     return;
                 }else {

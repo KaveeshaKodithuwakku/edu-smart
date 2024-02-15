@@ -144,6 +144,7 @@ public class RegistrationFormController {
            if (isPaymentSaved){
                new Alert(Alert.AlertType.INFORMATION,"Registration is success").show();
                loadTableData(searchText);
+               clearFields();
                return;
            }
        }
@@ -417,6 +418,7 @@ public class RegistrationFormController {
     }
 
     private void clearFields() {
+        txtStudentAutoSearch.clear();
         cmbIntake.setValue(null);
         cmbProgram.setValue(null);
     }
